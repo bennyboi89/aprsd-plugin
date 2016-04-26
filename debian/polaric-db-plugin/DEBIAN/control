@@ -1,0 +1,19 @@
+Package: polaric-db-plugin
+Version: 1.8.0+
+Architecture: all
+Maintainer: Øyvind Hanssen <ohanssen@acm.org>
+Installed-Size: 99
+Depends: polaric-aprsd (>= 1.8), postgresql-client, libpostgresql-jdbc-java, libpostgis-java, libcommons-pool-java, libcommons-dbcp-java
+Recommends: postgresql, postgis
+Section: hamradio
+Priority: optional
+Homepage: http://aprs.no/dokuwiki
+Description: Polaric Server: APRS daemon part.
+ The "Polaric Server" which is mainly a web based service to present APRS
+ tracking information on maps and where the information is updated at real-
+ time. It is originally targeted for use by radio amateurs in voluntary search
+ and rescue service in Norway. It consists of a web application and a server
+ program (APRS daemon).
+ .
+ This is a plugin that adds database storage. Mainly historical data. It is still
+ in an experimental stage.

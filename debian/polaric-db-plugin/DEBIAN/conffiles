@@ -1,0 +1,4 @@
+/etc/polaric-aprsd/config.d/db.ini
+/etc/polaric-aprsd/plugins/polaric-db.jar
+/etc/polaric-webapp/www/auto/database.js
+/etc/polaric-webapp/www/auto/edit.png
