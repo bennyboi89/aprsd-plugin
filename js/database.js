@@ -7,7 +7,7 @@ var hist_fromdate = null;
 var hist_fromtime= null;
 var hist_todate = null;
 var hist_totime = null;
-var layers = new OpenLayers();
+
 
 var hist = [];
 
@@ -152,6 +152,21 @@ function deleteSign(ident)
  }
 
 
+ /*************************************************************
+  * Function to delete a rescue mission(logged in users only)
+  * call to server: 'deleteMission'
+  *************************************************************/
+  function deleteMission(ident)
+  {
+     var id = null;
+     if (ident)
+        id = ident.substring(2);
+     fullPopupWindow('Slett_enkelt_objekt', server_url + 'srv/deleteMission' +
+        (id == null? "" : '?objsrc='+id),  300, 200);
+
+
+  }
+
 
 /********************************************************************************************/
 
@@ -244,6 +259,96 @@ function searchHistData(call)
         $(x).resizable();
 }
 
+/***************************************************************
+Adding search for old rescue missions. NOT IMPLEMENTED YET
+*****************************************************************/
+function searchMissionData(call)
+{
+   if (hist_fromdate == null)
+      hist_fromdate = formatDate(new Date());
+   if (hist_todate == null || hist_todate == '-')
+      hist_todate = formatDate(new Date());
+   if (hist_fromtime == null)
+      hist_fromtime = formatTime(new Date());
+   if (hist_totime == null || hist_totime == '-')
+      hist_totime = formatTime(new Date());
+   if (call != null)
+      hist_call = call;
+
+
+   var x = popupwindow(document.getElementById("anchor"),
+        ' <h1>Generere historisk spor</h1><hr><form>' +
+        ' <span class="sleftlab">Stasjon: </span><input type="text"  size="10" id="findcall" value="'
+             + hist_call + '"/><br> '+
+        ' <span class="sleftlab">Tid start: </span><input type="text"  size="10" id="tfrom" value="'
+                 + hist_fromdate +
+              '"/>&nbsp;<input type="text"  size="4" id="tfromt" value="'
+                 + hist_fromtime + '"/> <br> '+
+        ' <span class="sleftlab">Tid slutt: </span><input type="text" size="10" id="tto" value="'
+                 + hist_todate +
+              '"/>&nbsp;<input type="text" size="4" id="ttot" value="'
+                + hist_totime + '"/>&nbsp; <input type="checkbox" id="ttoopen"> Åpen slutt <br> '+
+        '<hr>'+
+        '<div id="searchlist"></div>' +
+        '<hr>'+
+        ' <input id="searchbutton" type="button"' +
+        ' value="Søk" />'+
+
+        ' <input id="addbutton" title="Legg spor til liste" type="button"' +
+        ' value="Legg til" />'+
+
+        ' <input id="showallbutton" title="Vis alle spor i liste" type="button"' +
+        ' value="Vis alle" />'+
+
+	' <input id="exportbutton" title="Eksporter spor (i liste) til GPX format" type="button"' +
+        ' value="Eksport" />'+
+
+        ' <input id="clearbutton" title="Nullstill liste" type="button"' +
+        ' value="Nullstill" />'+
+
+        '</form><br>' +
+	'<iframe id="downloadframe" style="display:none"></iframe>', 50, 70, null)
+
+        displayList();
+
+        $('#ttoopen').click( function() {
+          if ($('#ttoopen').attr('checked'))
+              $('#tto,#ttot').prop('disabled',true);
+          else
+              $('#tto,#ttot').removeProp('disabled');
+        });
+
+        $('#searchbutton').click( function() {
+           getItem();
+           getHistXmlData( hist_call.toUpperCase(), hist_fromdate+"/"+hist_fromtime, hist_todate+"/"+hist_totime );
+        });
+
+        $('#addbutton').click( function() {
+	  getItem();
+          hist_call = hist_call.toUpperCase();
+          hist.push({ call:hist_call, fromdate:hist_fromdate, todate:hist_todate,
+                      fromtime: hist_fromtime, totime: hist_totime});
+          displayList();
+        });
+
+        $('#showallbutton').click( function() {
+          showAll();
+        });
+
+	$('#exportbutton').click( function() {
+          exportGpx();
+        });
+
+
+
+        $('#clearbutton').click( function() {
+          hist = [];
+          displayList();
+        });
+
+        $('#tfrom,#tto').datepicker({ dateFormat: 'yy-mm-dd' });
+        $(x).resizable();
+}
 
 
 function displayList()

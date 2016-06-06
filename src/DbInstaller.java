@@ -28,17 +28,18 @@ public class DbInstaller
      private static String _url, _login, _passwd;
      private static Connection _db;
 
-
      static {
-        // Load the JDBC driver
-        try {
-          Class.forName("org.postgresql.Driver");
-        }
-        catch (ClassNotFoundException e) {
-            System.err.println("Board(static init): Couldn't load JDBC driver");
-            System.exit(1);
-        }
-     }
+             // Load the JDBC driver
+             // Only need this prior to JDBC 4.0
+             try {
+               Class.forName("org.postgresql.Driver");
+             }
+             catch (ClassNotFoundException e) {
+                 System.err.println("Board(static init): Couldn't load JDBC driver");
+                 System.exit(1);
+             }
+          }
+
 
 
      protected static void createClass(String name, String superclass, String attrs)
@@ -99,6 +100,8 @@ public class DbInstaller
 
      public static void main(String args[])
      {
+
+
          try {
             /* Get properties from configfile */
             if (args.length < 1)

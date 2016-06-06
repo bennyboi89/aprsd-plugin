@@ -2,9 +2,9 @@
 # FIXME: Could this be a more generic install script?
 
 
-INIFILE=server.ini   
-JDBCDRIVER="/usr/share/java/postgresql-jdbc4.jar"
-CLASSPATH=polaric-aprsd.jar:polaric-db.jar:/usr/share/java/commons-dbcp.jar:/usr/share/java/commons-pool.jar:/usr/share/java/commons-collections.jar:$JDBCDRIVER
+INIFILE=server.ini
+JDBCDRIVER="/usr/share/java/postgresql-9.4.1208.jar"
+CLASSPATH=polaric-aprsd.jar:polaric-db.jar:/usr/share/java/tomcat-dbcp.jar:/usr/share/java/tomcat-juli.jar:/usr/share/java/commons-collections4-4.1.jar:$JDBCDRIVER
 
 ###################################################
 # We dont need to change anything below this line
@@ -12,4 +12,3 @@ CLASSPATH=polaric-aprsd.jar:polaric-db.jar:/usr/share/java/commons-dbcp.jar:/usr
 
 java -cp $CLASSPATH no.polaric.aprsdb.DbInstaller $INIFILE $*
 echo "Done."
-     

@@ -1,4 +1,4 @@
- 
+
 Sette opp database med postgis
 ------------------------------
 
@@ -24,7 +24,7 @@ Opprett en database <dbname> og installer postgis:
   # Shall the new role be allowed to create databases? (y/n) n
   # Shall the new role be allowed to create more new roles? (y/n) n
 
-  # create database ownered by user 
+  # create database ownered by user
   createdb <databasename> --o <username>
 
   # Need to enable plpgsql for the database before loading the functions  # DO THIS IN V. 9.1???
@@ -33,7 +33,9 @@ Opprett en database <dbname> og installer postgis:
   # Finally, load the functions and reference system tables
   psql <databasename> -f /usr/share/postgresql/9.1/contrib/postgis-1.5/postgis.sql
   psql <databasename> -f /usr/share/postgresql/9.1/contrib/postgis-1.5/spatial_ref_sys.sql
-  
+  #If you are using a newer version of Postgis 2.+ then you need to run this
+  psql <databasename> -f /usr/share/postgresql/9.1/contrib/postgis-1.5/legacy.sql
+
 
   # login in new database (still as superuser postgres)
   psql <databasename>
@@ -41,9 +43,9 @@ Opprett en database <dbname> og installer postgis:
   # grant privilege on standard ogc tables to user
   grant all on geometry_columns to <username>;
   grant select on spatial_ref_sys to <username>;
-  
-  
-  
+
+
+
 FLYTTE DATABASE?
 ----------------
 
@@ -53,4 +55,3 @@ pg_dump -Fc polaric > polaric.dump
 ..create user and database like indicated above
 
 pg_restore -d polaric polaric.dump
-

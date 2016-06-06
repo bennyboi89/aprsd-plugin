@@ -26,20 +26,17 @@ package no.polaric.aprsdb
    val dateformat = "[0-9]{4}\\-[01][0-9]\\-[0-3][0-9]\\/[0-2][0-9]:[0-5][0-9]"
 
 
+       def personChoices(req: Request) = {
 
-   def personChoice(req: Request) = {
-           val I = getI18n(req)
-           <select id="symChoice" class="symChoice"
-              onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
-                  <option value="/c" style="background-image:url(../aprsd/icons/orient.png)"> {I.tr("Post")} </option>
-                  <option value="\m" style="background-image:url(../aprsd/icons/sign.png)"> {I.tr("Sign")} </option>
-                  <option value="\." style="background-image:url(../aprsd/icons/sym00.png)"> {I.tr("Cross")} </option>
-                  <option value="\n" style="background-image:url(../aprsd/icons/sym07.png)"> {I.tr("Triangle")} </option>
-                  <option value="/+" style="background-image:url(../aprsd/icons/sym02.png)"> {I.tr("Cross")} </option>
-                  <option value="/o" style="background-image:url(../aprsd/icons/eoc.png)"> {I.tr("OPS/EOS")} </option>
-                  <option value="/r" style="background-image:url(../aprsd/icons/radio.png)"> {I.tr("Radio station")} </option>
+         <select id="personList" class="symChoice"
+         onchange="var x=event.target.value;document.getElementById('missing').value=personList[personList.selectedIndex].text;">
+            <option value="Dement">Dement</option>
+            <option value="Ungdom">Ungdom</option>
+            <option value="Middel">Middel</option>
+            <option value="Gammel">Gammel</option>
             </select>
        }
+
 
    /**
     * Webservice to export a set of tracks in GPX format.
@@ -359,7 +356,12 @@ package no.polaric.aprsdb
                  <input id="alias" name="alias" type="text" size="30" maxlength="60"
                     value={ if (edit) obj.getAlias() else "" } />
                  <br/>
+                  <label for="missing" class="lleftlab">Forsvunnet:</label>
+                  {personChoices(req)}
 
+                  <input id="missing" name="missing" type="text" size="30" maxlength="60"/>
+
+                 <br/>
                  <label for="descr" class="lleftlab">Beskrivelse:</label>
                  <input id="descr" name="descr" type="text" size="30" maxlength="60"
                      value={ if (edit) obj.getDescr() else "" } />
@@ -375,6 +377,8 @@ package no.polaric.aprsdb
 
              /* Action. To be executed when user hits 'submit' button */
              def action(request : Request): NodeSeq =
+
+               //legge inn if for å sjekke om de nødvendige feltene er fyllt ut
                 {
                     val src = req.getParameter("src")
                     val alias = req.getParameter("alias")
@@ -382,6 +386,22 @@ package no.polaric.aprsdb
                     var end =   new Date()
                     val descr = req.getParameter("descr")
                     var icon = req.getParameter("icon")
+                    val missing = req.getParameter("missing")
+                    val perm = req.getParameter("perm")
+
+                    _api.log().info("Webservices", "SET OBJECT: '"+alias+"' by user '"+getAuthUser(request)+"'")
+                    if ( _api.getDB().getOwnObjects().add(src,
+                          new AprsHandler.PosData( pos,
+                              if (icon==null) 'c' else alias(0) ,
+                              if (missing==null) '/' else missing(0)),
+                          if (descr==null) "" else descr,
+                          "true".equals(perm) ))
+
+                  <h2>"Objekt oppdatert"</h2>
+                 <p>ident={"'"+alias+"'"}<br/>pos={showUTM(req, pos) }</p>;
+              else
+                 <h2>"Cannot update"</h2>
+                 <p> "Object '{0}' is already added by someone else", alias</p>
 
                     /* Try to get existing transaction and if not successful
                      * or if not in edit mode, create a new one
@@ -397,7 +417,7 @@ package no.polaric.aprsdb
                        if (edit && src !=null) {
                           db.updateMission(src, alias, icon, start, end, descr)
                           db.commit()
-                          <h2>Oppdrag {src} oppdatert</h2>
+                          <h2>Oppdrag {alias} oppdatert</h2>
                        }
                        else {
                           db.addMission(src, alias, icon, start, end, descr);
@@ -418,6 +438,43 @@ package no.polaric.aprsdb
          }
 
 
+         /**
+             * Delete Rescue Mission. NOT COMPLETE
+             */
+
+            def handle_deletemission(req : Request, res: Response) =
+            {
+                val I = getI18n(req)
+                var id = req.getParameter("objid")
+                id = if (id != null) id.replaceFirst("@.*", "") else null
+                val prefix = <h2> { I.tr("Remove object")} </h2>
+
+                def fields(req : Request): NodeSeq =
+                    <xml:group>
+                    <label for="objid" class="lleftlab">Objekt ID:</label>
+                    { textInput("objid", 9, 9,
+                         if (id==null) "" else id.replaceFirst("@.*", "") ) }
+                    </xml:group>
+                    ;
+
+
+                def action(req : Request): NodeSeq =
+                   if (id == null) {
+                       <h3> {I.tr("Error")+":"} </h3>
+                       <p> {I.tr("'objid' must be given as parameter")} </p>;
+                   }
+                   else {
+                       if (_api.getDB().getOwnObjects().delete(id)) {
+                           _api.log().info("Webservices", "DELETE OBJECT: '"+id+"' by user '"+getAuthUser(req)+"'")
+                           <h3> {I.tr("Object removed!")} </h3>
+                       }
+                       else
+                           <h3> {I.tr("Couldn't find object")+": "+id} </h3>
+                   }
+                   ;
+
+                printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
+            }
 
 
 
